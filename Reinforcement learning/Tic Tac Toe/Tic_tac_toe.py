@@ -5,7 +5,7 @@ strategy1 = [] #strategy for game player one
 strategy2 = [] #strategy for game player two
 
 #check the line
-def Check_line(line):
+def Check_line(line,player):
     positive_count = 0
     negative_count = 0
     for i in line:
@@ -13,26 +13,30 @@ def Check_line(line):
             negative_count += 1
         elif i == 1:
             positive_count += 1
-    if positive_count == 3 or negative_count ==3:
-        return True
+    if player == 1:
+        if positive_count == 2 and negative_count == 0:
+            return True
+    else:
+        if negative_count == 2 and positive_count == 0:
+            return True
     return False
 
 #check the game condition
-def Game_end(board):
+def Game_end(board, player):
     for i in board:
-        if Check_line(i):
+        if Check_line(i,player):
             return True
 
     for k in range(len(board)):
         sum = []
         for i in board:
             sum.append(i[k])
-        if Check_line(sum):
+        if Check_line(sum,player):
             return True
 
-    if Check_line([board[0][0], board[1][1], board[2][2]]):
+    if Check_line([board[0][0], board[1][1], board[2][2]], player):
         return True
-    elif Check_line([board[0][2], board[1][1], board[2][0]]):
+    elif Check_line([board[0][2], board[1][1], board[2][0]], player):
         return True
 
     return False
@@ -99,6 +103,11 @@ def Play_Game():
 
     #loop until the game ends
     while True:
+        #check end game
+        if Game_end(board, 1) or Filled(board):
+            if Game_end(board, 1):
+                winner = 1
+            break;
         #select move for player one
         action = Strategy(strategy1,board)
         this_board = duplicate_list(board)
@@ -107,10 +116,9 @@ def Play_Game():
         board = Update_board(1,action,board)
         #output game status
         present_board(board)
-        #check end game
-        if Game_end(board) or Filled(board):
-            if Game_end(board):
-                winner = 1
+        if Game_end(board, -1) or Filled(board):
+            if Game_end(board, -1):
+                winner = -1
             break;
         #select move for player two
         action = Strategy(strategy2,board)
@@ -120,10 +128,6 @@ def Play_Game():
         board = Update_board(-1,action,board)
         #output game status
         present_board(board)
-        if Game_end(board) or Filled(board):
-            if Game_end(board):
-                winner = -1
-            break;
 
     #award winners and punish losers
     if winner == 1:
@@ -151,7 +155,7 @@ def available_options(current_board):
     for i in range(len(current_board)):
         for k in range(len(current_board)):
             if current_board[i][k] == 0:
-                options.append([[i,k],500])
+                options.append([[i,k],100])
     return options
 
 #randomize the strategy selection
@@ -161,12 +165,12 @@ def randomization(current_options):
         num.append(i[1])
     minimum = np.min(num)
     if np.sum(num) < 0:
-        for i in num:
-            i -= minimum
+        for i in range(len(num)):
+            num[i] -= minimum
     interval = [num[0]]
     for t in range(1,len(num)):
         interval.append(num[t] + interval[t-1])
-    if np.sum(num) < 2:
+    if np.sum(num) < 0:
         print(num)
     pick = random.randint(0,np.sum(num))
     for t in range(0,len(interval)):
@@ -181,5 +185,7 @@ def present_board(board):
         print(i[0],'| ',i[1],'| ',i[2])
     print("================")
 
-for i in range(5000):
+for i in range(10000):
     Play_Game()
+
+print(strategy1[10])
