@@ -188,4 +188,34 @@ def present_board(board):
 for i in range(10000):
     Play_Game()
 
-print(strategy1[10])
+while True:
+    print("New Game?")
+    determine = input()
+    if determine.lower() == "no":
+        break
+    print("===================")
+    winner = 0
+    board = Start_Game()
+    while True:
+        if Game_end(board, 1) or Filled(board):
+            if Game_end(board, 1):
+                winner = 1
+            break;
+        #select move for player one
+        print("Please enter your next move")
+        move = input()
+        action = [int(move.split(',')[0]), int(move.split(',')[1])]
+        board = Update_board(1,action,board)
+        #output game status
+        present_board(board)
+        if Game_end(board, -1) or Filled(board):
+            if Game_end(board, -1):
+                winner = -1
+            break;
+        #select move for player two
+        action = Strategy(strategy2,board)
+        board = Update_board(-1,action,board)
+        #output game status
+        present_board(board)
+
+    print("Winner is ",winner)
